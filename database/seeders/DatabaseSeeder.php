@@ -20,13 +20,10 @@ class DatabaseSeeder extends Seeder
 						DistrictSeeder::class,
 						CommunitySeeder::class,
 						CrimeCategorySeeder::class,
-						GunApplicationSeeder::class,
-						GunRegistrationSeeder::class,
-						PaymentSeeder::class,
 						NotificationTemplateSeeder::class,
-						AuditLogSeeder::class,
-						EscalationLogSeeder::class,
-						IntegrationLogSeeder::class,
+						CrimeTypeSeeder::class,
+						SystemSettingSeeder::class,
+						EscalationRuleSeeder::class,
 				]);
     }
 }
