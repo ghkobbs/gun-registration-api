@@ -30,22 +30,22 @@ return [
 
     'disks' => [
 
-        'local' => [
-            'driver' => 'local',
-            'root' => storage_path('app/private'),
-            'serve' => true,
-            'throw' => false,
-            'report' => false,
-        ],
+        // 'local' => [
+        //     'driver' => 'local',
+        //     'root' => storage_path('app/private'),
+        //     'serve' => true,
+        //     'throw' => false,
+        //     'report' => false,
+        // ],
 
-        'public' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
-            'visibility' => 'public',
-            'throw' => false,
-            'report' => false,
-        ],
+        // 'public' => [
+        //     'driver' => 'local',
+        //     'root' => storage_path('app/public'),
+        //     'url' => env('APP_URL').'/storage',
+        //     'visibility' => 'public',
+        //     'throw' => false,
+        //     'report' => false,
+        // ],
 
         's3' => [
             'driver' => 's3',
@@ -59,6 +59,29 @@ return [
             'throw' => false,
             'report' => false,
         ],
+				'local' => [
+						'driver' => 'local',
+						'root' => storage_path('app'),
+				],
+
+				'public' => [
+						'driver' => 'local',
+						'root' => storage_path('app/public'),
+						'url' => env('APP_URL').'/storage',
+						'visibility' => 'public',
+				],
+
+				'documents' => [
+						'driver' => 'local',
+						'root' => storage_path('app/documents'),
+						'visibility' => 'private',
+				],
+
+				'evidence' => [
+						'driver' => 'local',
+						'root' => storage_path('app/evidence'),
+						'visibility' => 'private',
+				],
 
     ],
 
