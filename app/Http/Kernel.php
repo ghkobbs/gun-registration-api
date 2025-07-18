@@ -18,23 +18,29 @@ class Kernel extends HttpKernel
     /**
      * The application's route middleware groups.
      */
-    protected $middlewareGroups = [
-        'web' => [
-            // We don't need web middleware for API-only
-        ],
+   // app/Http/Kernel.php
+		protected $middlewareGroups = [
+				'web' => [
+						// \App\Http\Middleware\EncryptCookies::class,
+						\Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+						\Illuminate\Session\Middleware\StartSession::class,
+						\Illuminate\View\Middleware\ShareErrorsFromSession::class,
+						// \App\Http\Middleware\VerifyCsrfToken::class,
+						\Illuminate\Routing\Middleware\SubstituteBindings::class,
+				],
 
-        'api' => [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            'throttle:api',
-            \Illuminate\Routing\Middleware\SubstituteBindings::class,
-        ],
-    ];
+				'api' => [
+						\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+						'throttle:api',
+						\Illuminate\Routing\Middleware\SubstituteBindings::class,
+				],
+		];
 
     /**
      * The application's route middleware.
      */
     protected $routeMiddleware = [
-        'auth' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        'auth:sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
     ];
 }

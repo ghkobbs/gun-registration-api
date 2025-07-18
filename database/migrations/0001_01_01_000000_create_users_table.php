@@ -29,6 +29,9 @@ return new class extends Migration
             $table->string('remember_token')->nullable();
             $table->json('preferences')->nullable(); // notification preferences, language, etc.
             $table->timestamps();
+						$table->softDeletes();
+
+						$table->index(['email', 'phone_number', 'national_id']);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

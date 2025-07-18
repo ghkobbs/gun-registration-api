@@ -24,7 +24,7 @@ class ApiController extends Controller
         ];
 
         if ($errors) {
-            $response['errors'] = $errors;
+            // $response['errors'] = $errors;
         }
 
         return response()->json($response, $code);

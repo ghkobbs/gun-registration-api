@@ -41,14 +41,12 @@ Route::prefix('v1')->group(function () {
     Route::get('/crime-categories', [CrimeCategoryController::class, 'index']);
     Route::get('/regions', [RegionController::class, 'index']);
     Route::get('/districts', [DistrictController::class, 'index']);
-    Route::get('/communities', [CommunityController::class, 'index']);
+    // Route::get('/communities', [CommunityController::class, 'index']);
     
     // USSD routes
     Route::post('/ussd', [USSDController::class, 'handle']);
-});
 
-// Protected routes
-Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+	Route::middleware('auth:api')->group(function () {
     // User routes
     Route::get('/user', function (Request $request) {
         return $request->user();
@@ -77,11 +75,11 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
 		// Crime Categories
-    Route::apiResource('crime-categories', CrimeCategoryController::class);
+    Route::apiResource('crime-categories', CrimeCategoryController::class)->except('index');
     Route::post('crime-categories/{crimeCategory}/toggle-status', [CrimeCategoryController::class, 'toggleStatus']);
 
     // Regions
-    Route::apiResource('regions', RegionController::class);
+    Route::apiResource('regions', RegionController::class)->except('index');
     Route::get('regions/{region}/districts', [RegionController::class, 'districts']);
     Route::get('regions/{region}/statistics', [RegionController::class, 'statistics']);
     Route::post('regions/{region}/toggle-status', [RegionController::class, 'toggleStatus']);
@@ -112,4 +110,5 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('roles/{role}/assign-permissions', [RoleController::class, 'assignPermissions']);
     Route::post('roles/{role}/remove-permissions', [RoleController::class, 'removePermissions']);
     Route::get('roles/{role}/users', [RoleController::class, 'users']);
+	});
 });
