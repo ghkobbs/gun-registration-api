@@ -11,7 +11,7 @@ class Region extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'code', 'is_active'];
+    protected $fillable = ['name', 'code', 'is_active', 'region_id'];
     
     protected $casts = ['is_active' => 'boolean'];
 

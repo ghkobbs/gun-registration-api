@@ -41,7 +41,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/crime-categories', [CrimeCategoryController::class, 'index']);
     Route::get('/regions', [RegionController::class, 'index']);
     Route::get('/districts', [DistrictController::class, 'index']);
-    // Route::get('/communities', [CommunityController::class, 'index']);
+    Route::get('/communities', [CommunityController::class, 'index']);
     
     // USSD routes
     Route::post('/ussd', [USSDController::class, 'handle']);
@@ -60,7 +60,7 @@ Route::prefix('v1')->group(function () {
     Route::post('/gun-applications/{id}/submit', [GunApplicationController::class, 'submit']);
     
     // Crime reporting authenticated routes
-    Route::apiResource('crime-reports', CrimeReportController::class)->except(['store']);
+    Route::apiResource('crime-reports', CrimeReportController::class)->except(['index']);
     Route::post('/crime-reports/{id}/evidence', [CrimeReportController::class, 'uploadEvidence']);
     
     // Admin routes
@@ -85,13 +85,13 @@ Route::prefix('v1')->group(function () {
     Route::post('regions/{region}/toggle-status', [RegionController::class, 'toggleStatus']);
 
     // Districts
-    Route::apiResource('districts', DistrictController::class);
+    Route::apiResource('districts', DistrictController::class)->except('index');
     Route::get('districts/{district}/communities', [DistrictController::class, 'communities']);
     Route::get('districts/{district}/statistics', [DistrictController::class, 'statistics']);
     Route::post('districts/{district}/toggle-status', [DistrictController::class, 'toggleStatus']);
 
     // Communities
-    Route::apiResource('communities', CommunityController::class);
+    Route::apiResource('communities', CommunityController::class)->except(['index']);
     Route::get('communities/{community}/hotspots', [CommunityController::class, 'hotspots']);
     Route::get('communities/find-by-location', [CommunityController::class, 'findByLocation']);
     Route::post('communities/{community}/toggle-status', [CommunityController::class, 'toggleStatus']);

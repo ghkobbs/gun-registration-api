@@ -1,0 +1,2242 @@
+openapi: 3.0.3
+info:
+  title: Crime Reporting & Gun Registration API
+  description: API for crime reporting, gun registration, and administrative functions
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://127.0.0.1:8000/api/v1
+    description: Development server
+  - url: https://api.example.com/api/v1
+    description: Production server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        middle_name:
+          type: string
+        email:
+          type: string
+        phone_number:
+          type: string
+        national_id:
+          type: string
+        national_id_status:
+          type: string
+          enum: [pending, verified, failed]
+        user_type:
+          type: string
+          enum: [client, admin, staff, law_enforcement]
+        status:
+          type: string
+          enum: [active, suspended, pending_verification]
+        preferences:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        date_of_birth:
+          type: string
+          format: date
+        gender:
+          type: string
+          enum: [male, female, other]
+        occupation:
+          type: string
+        employer:
+          type: string
+        bio:
+          type: string
+        profile_photo_path:
+          type: string
+
+    UserAddress:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        type:
+          type: string
+        street_address:
+          type: string
+        city:
+          type: string
+        region:
+          type: string
+        postal_code:
+          type: string
+        country:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        is_primary:
+          type: boolean
+
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        display_name:
+          type: string
+        description:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        is_active:
+          type: boolean
+
+    CrimeCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        color:
+          type: string
+        priority_level:
+          type: integer
+        is_active:
+          type: boolean
+
+    CrimeType:
+      type: object
+      properties:
+        id:
+          type: integer
+        crime_category_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        severity_level:
+          type: integer
+        requires_immediate_response:
+          type: boolean
+        is_active:
+          type: boolean
+
+    CrimeReport:
+      type: object
+      properties:
+        id:
+          type: integer
+        report_number:
+          type: string
+        reference_code:
+          type: string
+        user_id:
+          type: integer
+        crime_type_id:
+          type: integer
+        reporter_name:
+          type: string
+        reporter_phone:
+          type: string
+        reporter_email:
+          type: string
+        is_anonymous:
+          type: boolean
+        reporting_method:
+          type: string
+          enum: [app, ussd, web, phone, in_person]
+        incident_description:
+          type: string
+        incident_date:
+          type: string
+          format: date-time
+        incident_location:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        region_id:
+          type: integer
+        district_id:
+          type: integer
+        community_id:
+          type: integer
+        suspects_count:
+          type: integer
+        victims_count:
+          type: integer
+        witnesses_count:
+          type: integer
+        urgency_level:
+          type: string
+          enum: [low, medium, high, critical]
+        status:
+          type: string
+          enum: [submitted, under_investigation, assigned, in_progress, resolved, closed, cancelled]
+        additional_notes:
+          type: string
+        assigned_to:
+          type: integer
+        assigned_at:
+          type: string
+          format: date-time
+        closed_by:
+          type: integer
+        closed_at:
+          type: string
+          format: date-time
+        closure_reason:
+          type: string
+        preferred_language:
+          type: string
+
+    CrimeEvidence:
+      type: object
+      properties:
+        id:
+          type: integer
+        crime_report_id:
+          type: integer
+        evidence_type:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        file_path:
+          type: string
+        file_name:
+          type: string
+        file_type:
+          type: string
+        file_size:
+          type: integer
+        metadata:
+          type: object
+        captured_at:
+          type: string
+          format: date-time
+
+    Region:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        is_active:
+          type: boolean
+
+    District:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        region_id:
+          type: integer
+        is_active:
+          type: boolean
+
+    Community:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        district_id:
+          type: integer
+        latitude:
+          type: number
+        longitude:
+          type: number
+        boundary:
+          type: object
+        is_active:
+          type: boolean
+
+    GunApplication:
+      type: object
+      properties:
+        id:
+          type: integer
+        application_number:
+          type: string
+        user_id:
+          type: integer
+        application_type:
+          type: string
+          enum: [new_registration, renewal, transfer, modification]
+        status:
+          type: string
+          enum: [draft, submitted, under_review, documents_required, approved, rejected, expired, escalated]
+        purpose_of_ownership:
+          type: string
+        has_previous_conviction:
+          type: boolean
+        conviction_details:
+          type: string
+        has_mental_health_issues:
+          type: boolean
+        mental_health_details:
+          type: string
+        emergency_contacts:
+          type: array
+          items:
+            type: object
+        rejection_reason:
+          type: string
+        reviewed_by:
+          type: integer
+        reviewed_at:
+          type: string
+          format: date-time
+        approved_by:
+          type: integer
+        approved_at:
+          type: string
+          format: date-time
+        submitted_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        is_escalated:
+          type: boolean
+        escalated_at:
+          type: string
+          format: date-time
+        escalated_by:
+          type: integer
+        escalation_reason:
+          type: string
+        priority_level:
+          type: integer
+
+    GunRegistration:
+      type: object
+      properties:
+        id:
+          type: integer
+        registration_number:
+          type: string
+        application_id:
+          type: integer
+        user_id:
+          type: integer
+        firearm_type:
+          type: string
+        make:
+          type: string
+        model:
+          type: string
+        caliber:
+          type: string
+        serial_number:
+          type: string
+        manufacture_year:
+          type: integer
+        barrel_length:
+          type: string
+        overall_length:
+          type: string
+        weight:
+          type: number
+        additional_features:
+          type: string
+        acquisition_method:
+          type: string
+        previous_owner_name:
+          type: string
+        previous_owner_id:
+          type: string
+        acquisition_date:
+          type: string
+          format: date
+        purchase_price:
+          type: number
+        dealer_name:
+          type: string
+        dealer_license_number:
+          type: string
+        status:
+          type: string
+          enum: [active, suspended, revoked, expired]
+        registration_date:
+          type: string
+          format: date
+        expiry_date:
+          type: string
+          format: date
+
+    Document:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        documentable_type:
+          type: string
+        documentable_id:
+          type: integer
+        document_type:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        file_path:
+          type: string
+        file_name:
+          type: string
+        file_type:
+          type: string
+        file_size:
+          type: integer
+        verification_status:
+          type: string
+          enum: [pending, verified, rejected]
+        verification_notes:
+          type: string
+        verified_by:
+          type: integer
+        verified_at:
+          type: string
+          format: date-time
+        is_required:
+          type: boolean
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+        payment_reference:
+          type: string
+        user_id:
+          type: integer
+        payable_type:
+          type: string
+        payable_id:
+          type: integer
+        amount:
+          type: number
+        currency:
+          type: string
+        payment_method:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed, refunded]
+        gateway_reference:
+          type: string
+        gateway_response:
+          type: string
+        gateway_data:
+          type: object
+        description:
+          type: string
+        paid_at:
+          type: string
+          format: date-time
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        notifiable_type:
+          type: string
+        notifiable_id:
+          type: integer
+        data:
+          type: string
+        read_at:
+          type: string
+          format: date-time
+
+    NotificationTemplate:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        subject:
+          type: string
+        email_template:
+          type: string
+        sms_template:
+          type: string
+        variables:
+          type: object
+        type:
+          type: string
+          enum: [email, sms, both]
+        is_active:
+          type: boolean
+
+    NotificationLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        type:
+          type: string
+        variables:
+          type: object
+        related_id:
+          type: integer
+        sent_at:
+          type: string
+          format: date-time
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_type:
+          type: string
+        user_id:
+          type: integer
+        event:
+          type: string
+        auditable_type:
+          type: string
+        auditable_id:
+          type: integer
+        old_values:
+          type: object
+        new_values:
+          type: object
+        url:
+          type: string
+        ip_address:
+          type: string
+        user_agent:
+          type: string
+        tags:
+          type: string
+
+    EscalationRule:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        trigger_condition:
+          type: string
+        threshold_value:
+          type: integer
+        escalation_action:
+          type: string
+        escalation_targets:
+          type: object
+        priority_level:
+          type: integer
+        is_active:
+          type: boolean
+
+    EscalationLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        escalatable_type:
+          type: string
+        escalatable_id:
+          type: integer
+        escalation_rule_id:
+          type: integer
+        escalated_by:
+          type: integer
+        escalated_to:
+          type: integer
+        escalation_reason:
+          type: string
+        status:
+          type: string
+          enum: [pending, acknowledged, resolved]
+        escalated_at:
+          type: string
+          format: date-time
+        acknowledged_at:
+          type: string
+          format: date-time
+        resolved_at:
+          type: string
+          format: date-time
+        resolution_notes:
+          type: string
+
+    ReportUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+        crime_report_id:
+          type: integer
+        updated_by:
+          type: integer
+        update_type:
+          type: string
+        message:
+          type: string
+        visibility:
+          type: string
+          enum: [public, internal, reporter_only]
+        metadata:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+
+    CrimeStatistic:
+      type: object
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+          format: date
+        crime_type_id:
+          type: integer
+        region_id:
+          type: integer
+        district_id:
+          type: integer
+        community_id:
+          type: integer
+        total_reports:
+          type: integer
+        resolved_reports:
+          type: integer
+        pending_reports:
+          type: integer
+        resolution_rate:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+
+    IntegrationLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        service_name:
+          type: string
+        operation_type:
+          type: string
+        request_data:
+          type: string
+        response_data:
+          type: string
+        status:
+          type: string
+          enum: [success, failed, timeout, error]
+        error_message:
+          type: string
+        response_time:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    SystemSetting:
+      type: object
+      properties:
+        id:
+          type: integer
+        key:
+          type: string
+        value:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        is_public:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    USSDSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        session_id:
+          type: string
+        phone_number:
+          type: string
+        current_menu:
+          type: string
+        session_data:
+          type: object
+        language:
+          type: string
+        status:
+          type: string
+          enum: [active, completed, timeout, cancelled]
+        last_activity:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    CommunityAlert:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        message:
+          type: string
+        alert_type:
+          type: string
+          enum: [crime_warning, safety_tip, emergency, general]
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        latitude:
+          type: number
+        longitude:
+          type: number
+        radius:
+          type: number
+        region_id:
+          type: integer
+        district_id:
+          type: integer
+        community_id:
+          type: integer
+        created_by:
+          type: integer
+        expires_at:
+          type: string
+          format: date-time
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      tags: [System]
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  timestamp:
+                    type: string
+                  version:
+                    type: string
+
+  /register:
+    post:
+      summary: Register a new user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, phone]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                password_confirmation:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        '201':
+          description: User registered successfully
+        '422':
+          description: Validation error
+
+  /login:
+    post:
+      summary: Login user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+
+  /forgot-password:
+    post:
+      summary: Request password reset
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Password reset email sent
+
+  /reset-password:
+    post:
+      summary: Reset password
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, password_confirmation, token]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                password_confirmation:
+                  type: string
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Password reset successful
+
+  /logout:
+    post:
+      summary: Logout user
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+
+  /user:
+    get:
+      summary: Get current user
+      tags: [User]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /user/profile:
+    put:
+      summary: Update user profile
+      tags: [User]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated successfully
+
+  /user/upload-avatar:
+    post:
+      summary: Upload user avatar
+      tags: [User]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Avatar uploaded successfully
+
+  /crime-reports:
+    get:
+      summary: Get crime reports
+      tags: [Crime Reports]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of crime reports
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CrimeReport'
+
+    post:
+      summary: Create crime report
+      tags: [Crime Reports]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, description, crime_category_id]
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                location:
+                  type: string
+                latitude:
+                  type: number
+                longitude:
+                  type: number
+                crime_category_id:
+                  type: integer
+      responses:
+        '201':
+          description: Crime report created successfully
+
+  /crime-reports/{id}:
+    get:
+      summary: Get specific crime report
+      tags: [Crime Reports]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Crime report details
+
+    put:
+      summary: Update crime report
+      tags: [Crime Reports]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrimeReport'
+      responses:
+        '200':
+          description: Crime report updated successfully
+
+    delete:
+      summary: Delete crime report
+      tags: [Crime Reports]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Crime report deleted successfully
+
+  /crime-reports/{id}/evidence:
+    post:
+      summary: Upload evidence for crime report
+      tags: [Crime Reports]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                evidence:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Evidence uploaded successfully
+
+  /crime-categories:
+    get:
+      summary: Get crime categories
+      tags: [Crime Categories]
+      responses:
+        '200':
+          description: List of crime categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CrimeCategory'
+
+    post:
+      summary: Create crime category
+      tags: [Crime Categories]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Crime category created successfully
+
+  /crime-categories/{id}:
+    get:
+      summary: Get specific crime category
+      tags: [Crime Categories]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Crime category details
+
+    put:
+      summary: Update crime category
+      tags: [Crime Categories]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrimeCategory'
+      responses:
+        '200':
+          description: Crime category updated successfully
+
+    delete:
+      summary: Delete crime category
+      tags: [Crime Categories]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Crime category deleted successfully
+
+  /crime-categories/{crimeCategory}/toggle-status:
+    post:
+      summary: Toggle crime category status
+      tags: [Crime Categories]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: crimeCategory
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Status toggled successfully
+
+  /regions:
+    get:
+      summary: Get regions
+      tags: [Regions]
+      responses:
+        '200':
+          description: List of regions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Region'
+
+    post:
+      summary: Create region
+      tags: [Regions]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, code]
+              properties:
+                name:
+                  type: string
+                code:
+                  type: string
+      responses:
+        '201':
+          description: Region created successfully
+
+  /regions/{id}:
+    get:
+      summary: Get specific region
+      tags: [Regions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Region details
+
+    put:
+      summary: Update region
+      tags: [Regions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Region'
+      responses:
+        '200':
+          description: Region updated successfully
+
+    delete:
+      summary: Delete region
+      tags: [Regions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Region deleted successfully
+
+  /regions/{region}/districts:
+    get:
+      summary: Get districts in region
+      tags: [Regions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of districts in region
+
+  /regions/{region}/statistics:
+    get:
+      summary: Get region statistics
+      tags: [Regions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Region statistics
+
+  /regions/{region}/toggle-status:
+    post:
+      summary: Toggle region status
+      tags: [Regions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Status toggled successfully
+
+  /districts:
+    get:
+      summary: Get districts
+      tags: [Districts]
+      responses:
+        '200':
+          description: List of districts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/District'
+
+    post:
+      summary: Create district
+      tags: [Districts]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, region_id]
+              properties:
+                name:
+                  type: string
+                region_id:
+                  type: integer
+      responses:
+        '201':
+          description: District created successfully
+
+  /districts/{id}:
+    get:
+      summary: Get specific district
+      tags: [Districts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: District details
+
+    put:
+      summary: Update district
+      tags: [Districts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/District'
+      responses:
+        '200':
+          description: District updated successfully
+
+    delete:
+      summary: Delete district
+      tags: [Districts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: District deleted successfully
+
+  /districts/{district}/communities:
+    get:
+      summary: Get communities in district
+      tags: [Districts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: district
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of communities in district
+
+  /districts/{district}/statistics:
+    get:
+      summary: Get district statistics
+      tags: [Districts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: district
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: District statistics
+
+  /districts/{district}/toggle-status:
+    post:
+      summary: Toggle district status
+      tags: [Districts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: district
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Status toggled successfully
+
+  /communities:
+    get:
+      summary: Get communities
+      tags: [Communities]
+      responses:
+        '200':
+          description: List of communities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Community'
+
+    post:
+      summary: Create community
+      tags: [Communities]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, district_id]
+              properties:
+                name:
+                  type: string
+                district_id:
+                  type: integer
+      responses:
+        '201':
+          description: Community created successfully
+
+  /communities/{id}:
+    get:
+      summary: Get specific community
+      tags: [Communities]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Community details
+
+    put:
+      summary: Update community
+      tags: [Communities]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Community'
+      responses:
+        '200':
+          description: Community updated successfully
+
+    delete:
+      summary: Delete community
+      tags: [Communities]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Community deleted successfully
+
+  /communities/{community}/hotspots:
+    get:
+      summary: Get community hotspots
+      tags: [Communities]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: community
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Community hotspots
+
+  /communities/find-by-location:
+    get:
+      summary: Find community by location
+      tags: [Communities]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Community found by location
+
+  /communities/{community}/toggle-status:
+    post:
+      summary: Toggle community status
+      tags: [Communities]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: community
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Status toggled successfully
+
+  /gun-applications:
+    get:
+      summary: Get gun applications
+      tags: [Gun Applications]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of gun applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GunApplication'
+
+    post:
+      summary: Create gun application
+      tags: [Gun Applications]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [applicant_name, purpose, gun_type]
+              properties:
+                applicant_name:
+                  type: string
+                purpose:
+                  type: string
+                gun_type:
+                  type: string
+      responses:
+        '201':
+          description: Gun application created successfully
+
+  /gun-applications/{id}:
+    get:
+      summary: Get specific gun application
+      tags: [Gun Applications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Gun application details
+
+    put:
+      summary: Update gun application
+      tags: [Gun Applications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GunApplication'
+      responses:
+        '200':
+          description: Gun application updated successfully
+
+    delete:
+      summary: Delete gun application
+      tags: [Gun Applications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Gun application deleted successfully
+
+  /gun-applications/{id}/documents:
+    post:
+      summary: Upload documents for gun application
+      tags: [Gun Applications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                documents:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Documents uploaded successfully
+
+  /gun-applications/{id}/submit:
+    post:
+      summary: Submit gun application
+      tags: [Gun Applications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Gun application submitted successfully
+
+  /gun-registrations:
+    get:
+      summary: Get gun registrations
+      tags: [Gun Registrations]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of gun registrations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GunRegistration'
+
+    post:
+      summary: Create gun registration
+      tags: [Gun Registrations]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [gun_type, serial_number]
+              properties:
+                gun_type:
+                  type: string
+                serial_number:
+                  type: string
+                registration_number:
+                  type: string
+      responses:
+        '201':
+          description: Gun registration created successfully
+
+  /gun-registrations/{id}:
+    get:
+      summary: Get specific gun registration
+      tags: [Gun Registrations]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Gun registration details
+
+    put:
+      summary: Update gun registration
+      tags: [Gun Registrations]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GunRegistration'
+      responses:
+        '200':
+          description: Gun registration updated successfully
+
+    delete:
+      summary: Delete gun registration
+      tags: [Gun Registrations]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Gun registration deleted successfully
+
+  /my-gun-registrations:
+    get:
+      summary: Get current user's gun registrations
+      tags: [Gun Registrations]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User's gun registrations
+
+  /gun-registrations/{gunRegistration}/suspend:
+    post:
+      summary: Suspend gun registration
+      tags: [Gun Registrations]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: gunRegistration
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Gun registration suspended
+
+  /gun-registrations/{gunRegistration}/revoke:
+    post:
+      summary: Revoke gun registration
+      tags: [Gun Registrations]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: gunRegistration
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Gun registration revoked
+
+  /gun-registrations/{gunRegistration}/reactivate:
+    post:
+      summary: Reactivate gun registration
+      tags: [Gun Registrations]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: gunRegistration
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Gun registration reactivated
+
+  /gun-registrations-statistics:
+    get:
+      summary: Get gun registration statistics
+      tags: [Gun Registrations]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Gun registration statistics
+
+  /users:
+    get:
+      summary: Get users (Admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+    post:
+      summary: Create user (Admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        '201':
+          description: User created successfully
+
+  /users/{id}:
+    get:
+      summary: Get specific user (Admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User details
+
+    put:
+      summary: Update user (Admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User updated successfully
+
+    delete:
+      summary: Delete user (Admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: User deleted successfully
+
+  /roles:
+    get:
+      summary: Get roles
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+
+    post:
+      summary: Create role
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Role created successfully
+
+  /roles/{id}:
+    get:
+      summary: Get specific role
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Role details
+
+    put:
+      summary: Update role
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Role'
+      responses:
+        '200':
+          description: Role updated successfully
+
+    delete:
+      summary: Delete role
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Role deleted successfully
+
+  /permissions:
+    get:
+      summary: Get permissions
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of permissions
+
+  /roles/{role}/assign-permissions:
+    post:
+      summary: Assign permissions to role
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                permissions:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Permissions assigned successfully
+
+  /roles/{role}/remove-permissions:
+    post:
+      summary: Remove permissions from role
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                permissions:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Permissions removed successfully
+
+  /roles/{role}/users:
+    get:
+      summary: Get users with specific role
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Users with the role
+
+  /ussd:
+    post:
+      summary: Handle USSD requests
+      tags: [USSD]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sessionId:
+                  type: string
+                serviceCode:
+                  type: string
+                phoneNumber:
+                  type: string
+                text:
+                  type: string
+      responses:
+        '200':
+          description: USSD response
+          content:
+            text/plain:
+              schema:
+                type: string
+
+tags:
+  - name: System
+    description: System health and status endpoints
+  - name: Authentication
+    description: User authentication endpoints
+  - name: User
+    description: User profile management
+  - name: Crime Reports
+    description: Crime reporting functionality
+  - name: Crime Categories
+    description: Crime category management
+  - name: Regions
+    description: Region management
+  - name: Districts
+    description: District management
+  - name: Communities
+    description: Community management
+  - name: Gun Applications
+    description: Gun license application management
+  - name: Gun Registrations
+    description: Gun registration management
+  - name: Users
+    description: User management (Admin)
+  - name: Roles
+    description: Role and permission management
+  - name: USSD
+    description: USSD service integration
