@@ -58,7 +58,7 @@ RUN chown -R www:www /var/www/html \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
 # Install PHP dependencies using Composer
-RUN composer install --no-interaction --optimize-autoloader
+RUN sudo composer install --no-interaction --optimize-autoloader
 
 # Change current user to www
 USER www
