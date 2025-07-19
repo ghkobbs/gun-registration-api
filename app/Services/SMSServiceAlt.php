@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 
-class SMSService
+class SMSServiceAlt
 {
     protected $apiKey;
     protected $apiUrl;

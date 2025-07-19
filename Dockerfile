@@ -43,25 +43,22 @@ RUN pecl install redis && docker-php-ext-enable redis
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Create system user to run Composer and Artisan Commands
-RUN groupadd -g 1000 www
-RUN useradd -u 1000 -ms /bin/bash -g www www
-
-# Copy existing application directory contents
-COPY . /var/www/html
+RUN groupadd -g 1000 ubuntu
+RUN useradd -u 1000 -ms /bin/bash -g ubuntu ubuntu
 
 # Copy existing application directory permissions
-COPY --chown=www:www . /var/www/html
+COPY --chown=ubuntu:ubuntu . /var/www/html
+
+# Install PHP dependencies using Composer
+RUN composer install --no-dev --no-interaction --optimize-autoloader
 
 # Set proper permissions
-RUN chown -R www:www /var/www/html \
+RUN chown -R ubuntu:ubuntu /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Install PHP dependencies using Composer
-RUN sudo composer install --no-interaction --optimize-autoloader
-
 # Change current user to www
-USER www
+USER ubuntu
 
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000
