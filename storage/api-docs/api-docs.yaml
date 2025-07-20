@@ -8,6 +8,8 @@ info:
     email: support@example.com
 
 servers:
+  - url: http://129.151.166.183:5152/api/v1
+    description: UAT server
   - url: http://127.0.0.1:8000/api/v1
     description: Development server
   - url: https://api.example.com/api/v1
