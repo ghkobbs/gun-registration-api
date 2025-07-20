@@ -785,6 +785,28 @@ components:
           type: string
           format: date-time
 
+    PaginatedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        pagination:
+          type: object
+          properties:
+            current_page:
+              type: integer
+            per_page:
+              type: integer
+            total:
+              type: integer
+            last_page:
+              type: integer
 paths:
   /health:
     get:
@@ -2214,7 +2236,340 @@ paths:
             text/plain:
               schema:
                 type: string
+  # Add to the paths section:
+  /documents:
+    get:
+      summary: List documents
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: document_type
+          in: query
+          schema:
+            type: string
+        - name: verification_status
+          in: query
+          schema:
+            type: string
+            enum: [pending, verified, rejected]
+      responses:
+        '200':
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Document'
+                  pagination:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total:
+                        type: integer
+                      last_page:
+                        type: integer
 
+    post:
+      summary: Upload new document
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - document_type
+                - title
+                - file
+                - documentable_type
+                - documentable_id
+              properties:
+                document_type:
+                  type: string
+                title:
+                  type: string
+                description:
+                  type: string
+                file:
+                  type: string
+                  format: binary
+                documentable_type:
+                  type: string
+                documentable_id:
+                  type: integer
+                is_required:
+                  type: boolean
+      responses:
+        '201':
+          description: Document created successfully
+
+  /documents/{id}:
+    get:
+      summary: Get document details
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Document details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+
+    put:
+      summary: Update document
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                document_type:
+                  type: string
+                is_required:
+                  type: boolean
+      responses:
+        '200':
+          description: Document updated successfully
+
+    delete:
+      summary: Delete document
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Document deleted successfully
+
+  /documents/{id}/verify:
+    post:
+      summary: Verify document
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Document verified successfully
+
+  /documents/{id}/reject:
+    post:
+      summary: Reject document
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Document rejected successfully
+
+  /documents/{id}/download:
+    get:
+      summary: Download document file
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Document file stream
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Document file not found
+  /payments:
+    get:
+      summary: List payments
+      tags: [Payments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, processing, completed, failed, refunded]
+        - name: payment_method
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of payments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaymentResponse'
+
+    post:
+      summary: Initialize payment
+      tags: [Payments]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+                - payment_method
+                - currency
+                - payable_type
+                - payable_id
+              properties:
+                amount:
+                  type: number
+                payment_method:
+                  type: string
+                currency:
+                  type: string
+                payable_type:
+                  type: string
+                payable_id:
+                  type: integer
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Payment initialized successfully
+
+  /payments/{id}:
+    get:
+      summary: Get payment details
+      tags: [Payments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Payment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+
+  /payments/verify:
+    post:
+      summary: Verify payment
+      tags: [Payments]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reference
+              properties:
+                reference:
+                  type: string
+      responses:
+        '200':
+          description: Payment verified successfully
+
+  /payments/{id}/refund:
+    post:
+      summary: Refund payment
+      tags: [Payments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Payment refunded successfully
 tags:
   - name: System
     description: System health and status endpoints

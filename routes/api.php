@@ -5,8 +5,10 @@ use App\Http\Controllers\Api\V1\CommunityController;
 use App\Http\Controllers\Api\V1\CrimeCategoryController;
 use App\Http\Controllers\Api\V1\CrimeReportController;
 use App\Http\Controllers\Api\V1\DistrictController;
+use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\GunApplicationController;
 use App\Http\Controllers\Api\V1\GunRegistrationController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\RegionController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\UserController;
@@ -110,5 +112,16 @@ Route::prefix('v1')->group(function () {
     Route::post('roles/{role}/assign-permissions', [RoleController::class, 'assignPermissions']);
     Route::post('roles/{role}/remove-permissions', [RoleController::class, 'removePermissions']);
     Route::get('roles/{role}/users', [RoleController::class, 'users']);
+
+			// Document routes
+			Route::apiResource('documents', DocumentController::class);
+			Route::post('documents/{document}/verify', [DocumentController::class, 'verify']);
+			Route::post('documents/{document}/reject', [DocumentController::class, 'reject']);
+			Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+
+			// Payment routes
+			Route::apiResource('payments', PaymentController::class)->except(['update', 'destroy']);
+			Route::post('payments/verify', [PaymentController::class, 'verify'])->name('payments.verify');
+			Route::post('payments/{payment}/refund', [PaymentController::class, 'refund']);
 	});
 });
