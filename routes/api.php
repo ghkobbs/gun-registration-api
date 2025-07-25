@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\V1\DistrictController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\GunApplicationController;
 use App\Http\Controllers\Api\V1\GunRegistrationController;
+use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\NotificationTemplateController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\RegionController;
 use App\Http\Controllers\Api\V1\RoleController;
@@ -123,5 +125,18 @@ Route::prefix('v1')->group(function () {
 			Route::apiResource('payments', PaymentController::class)->except(['update', 'destroy']);
 			Route::post('payments/verify', [PaymentController::class, 'verify'])->name('payments.verify');
 			Route::post('payments/{payment}/refund', [PaymentController::class, 'refund']);
+
+    // Notifications
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::get('notifications/{notification}', [NotificationController::class, 'show']);
+    Route::post('notifications/send', [NotificationController::class, 'send']);
+    Route::post('notifications/send-bulk', [NotificationController::class, 'sendBulk']);
+    Route::post('notifications/mark-as-read', [NotificationController::class, 'markAsRead']);
+    Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('notifications/{notification}', [NotificationController::class, 'destroy']);
+
+    // Notification Templates
+    Route::apiResource('notification-templates', NotificationTemplateController::class);
+    Route::post('notification-templates/{template}/preview', [NotificationTemplateController::class, 'preview']);
 	});
 });
